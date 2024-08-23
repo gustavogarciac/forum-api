@@ -1,17 +1,53 @@
-import { Controller, Post, UseGuards } from '@nestjs/common'
+/* eslint-disable no-useless-escape */
+import { Body, Controller, Post, UseGuards } from '@nestjs/common'
 import { CurrentUser } from 'src/auth/current-user-decorator'
 import { UserPayload } from 'src/auth/jwt.strategy'
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard'
+import { ZodValidationPipe } from 'src/pipes/zod-validation-pipe'
+import { PrismaService } from 'src/prisma/prisma.service'
+import { z } from 'zod'
 
+const createQuestionBodySchema = z.object({
+  title: z.string(),
+  content: z.string(),
+})
+
+const bodyValidationPipe = new ZodValidationPipe(createQuestionBodySchema)
+
+type CreateQuestionBodySchema = z.infer<typeof createQuestionBodySchema>
 @Controller('/questions')
 @UseGuards(JwtAuthGuard)
 export class CreateQuestionController {
-  constructor() {}
+  constructor(private prisma: PrismaService) {}
 
   @Post()
-  async handle(@CurrentUser() user: UserPayload) {
-    console.log(user)
+  async handle(
+    @Body(bodyValidationPipe) body: CreateQuestionBodySchema,
+    @CurrentUser() user: UserPayload,
+  ) {
+    const { content, title } = body
+    const userId = user.sub
 
-    return 'ok'
+    const slug = this.convertToSlug(title)
+
+    await this.prisma.question.create({
+      data: {
+        title,
+        content,
+        slug,
+        authorId: userId,
+      },
+    })
+  }
+
+  convertToSlug(str: string): string {
+    return str
+      .normalize('NFD') // Normalize to separate accents from characters
+      .replace(/[\u0300-\u036f]/g, '') // Remove accent characters
+      .toLowerCase() // Convert to lowercase
+      .trim() // Trim leading/trailing spaces
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/[^\w\-]+/g, '') // Remove all non-word characters
+      .replace(/\-\-+/g, '-') // Replace multiple hyphens with single one
   }
 }

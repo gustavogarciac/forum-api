@@ -29,3 +29,8 @@ POST {{baseUrl}}/questions
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
+{
+  "title": "What is the best programming language?",
+  "content": "I'm trying to learn a new programming language and I'm not sure which one to choose. Can you help me?"
+}
+
