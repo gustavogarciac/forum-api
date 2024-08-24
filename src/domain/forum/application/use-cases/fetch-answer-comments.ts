@@ -5,6 +5,8 @@ import { AnswerCommentsRepository } from '../repositories/answer-comments-reposi
 
 interface FetchAnswerCommentsUseCaseRequest {
   page: number
+  perPage: number
+  query?: string
   answerId: string
 }
 
@@ -20,11 +22,15 @@ export class FetchAnswerCommentsUseCase {
 
   async execute({
     page,
+    perPage,
+    query,
     answerId,
   }: FetchAnswerCommentsUseCaseRequest): Promise<FetchAnswerCommentsUseCaseResponse> {
     const answerComments =
       await this.answerCommentsRepository.findManyByAnswerId(answerId, {
         page,
+        perPage,
+        query,
       })
 
     return right({
