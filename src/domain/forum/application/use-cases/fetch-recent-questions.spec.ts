@@ -28,7 +28,7 @@ describe('Fetch Recent Questions By Slug Use Case', () => {
       makeQuestion({ createdAt: new Date(2024, 0, 23) }),
     )
 
-    const result = await sut.execute({ page: 1 })
+    const result = await sut.execute({ page: 1, perPage: 3 })
 
     expect(result.value?.questions).toHaveLength(3)
   })
@@ -44,7 +44,7 @@ describe('Fetch Recent Questions By Slug Use Case', () => {
       makeQuestion({ createdAt: new Date(2024, 0, 23) }),
     )
 
-    const result = await sut.execute({ page: 1 })
+    const result = await sut.execute({ page: 1, perPage: 3 })
 
     expect(result.value?.questions).toEqual([
       expect.objectContaining({ createdAt: new Date(2024, 0, 23) }),
@@ -58,10 +58,25 @@ describe('Fetch Recent Questions By Slug Use Case', () => {
       await questionsRepository.create(makeQuestion())
     }
 
-    const result = await sut.execute({ page: 1 })
-    const secondResult = await sut.execute({ page: 2 })
+    const result = await sut.execute({ page: 1, perPage: 20 })
+    const secondResult = await sut.execute({ page: 2, perPage: 20 })
 
     expect(result.value?.questions).toHaveLength(20)
     expect(secondResult.value?.questions).toHaveLength(2)
+  })
+
+  it('should be able to fetch recent questions with query', async () => {
+    await questionsRepository.create(makeQuestion({ title: 'Question 1' }))
+    await questionsRepository.create(makeQuestion({ title: 'Question 2' }))
+    await questionsRepository.create(makeQuestion({ title: 'Question 3' }))
+
+    const result = await sut.execute({
+      page: 1,
+      perPage: 3,
+      query: 'question 2',
+    })
+
+    expect(result.value?.questions).toHaveLength(1)
+    expect(result.value?.questions[0].title).toBe('Question 2')
   })
 })

@@ -53,13 +53,28 @@ export class InMemoryQuestionsRepository implements QuestionsRepository {
     DomainEvents.dispatchEventsForAggregate(question.id)
   }
 
-  async findManyRecent({ page }: PaginationParams) {
+  async findManyRecent({ page, perPage, query }: PaginationParams) {
     const sortedQuestions = [...this.items].sort(
       (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
     ) // Difference in time between two questions
     // It is using spread operator so that the array of items do not mutate.
 
-    const paginatedQuestions = sortedQuestions.slice((page - 1) * 20, page * 20)
+    const paginatedQuestions = sortedQuestions.slice(
+      (page - 1) * perPage,
+      page * perPage,
+    )
+
+    if (query) {
+      const queryLowerCase = query.toLowerCase()
+
+      const queryQuestions = paginatedQuestions.filter(
+        (question) =>
+          question.title.toLowerCase().includes(queryLowerCase) ||
+          question.content.toLowerCase().includes(queryLowerCase),
+      )
+
+      return queryQuestions
+    }
 
     return paginatedQuestions
   }
