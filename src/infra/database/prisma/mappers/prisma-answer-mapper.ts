@@ -1,20 +1,15 @@
-import { Prisma, Question as PrismaQuestion } from '@prisma/client'
+import { Answer as PrismaAnswer, Prisma } from '@prisma/client'
 
 import { UniqueEntityId } from '@/core/entities/unique-entity-id'
-import { Question } from '@/domain/forum/enterprise/entities/question'
-import { Slug } from '@/domain/forum/enterprise/entities/value-objects/slug'
+import { Answer } from '@/domain/forum/enterprise/entities/answer'
 
 export class PrismaAnswerMapper {
-  static toDomain(raw: PrismaQuestion): Question {
-    return Question.create(
+  static toDomain(raw: PrismaAnswer): Answer {
+    return Answer.create(
       {
-        title: raw.title,
         content: raw.content,
-        slug: Slug.create(raw.slug),
+        questionId: new UniqueEntityId(raw.questionId),
         authorId: new UniqueEntityId(raw.authorId),
-        bestAnswerId: raw.bestAnswerId
-          ? new UniqueEntityId(raw.bestAnswerId)
-          : null,
         createdAt: raw.createdAt,
         updatedAt: raw.updatedAt,
       },
@@ -22,18 +17,14 @@ export class PrismaAnswerMapper {
     )
   }
 
-  static toPersistence(
-    question: Question,
-  ): Prisma.QuestionUncheckedCreateInput {
+  static toPersistence(answer: Answer): Prisma.AnswerUncheckedCreateInput {
     return {
-      id: question.id.toString(),
-      authorId: question.authorId.toString(),
-      bestAnswerId: question.bestAnswerId?.toString() ?? null,
-      title: question.title,
-      content: question.content,
-      slug: question.slug.value,
-      createdAt: question.createdAt,
-      updatedAt: question.updatedAt,
+      id: answer.id.toString(),
+      authorId: answer.authorId.toString(),
+      questionId: answer.questionId.toString(),
+      content: answer.content,
+      createdAt: answer.createdAt,
+      updatedAt: answer.updatedAt,
     }
   }
 }
