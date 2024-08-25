@@ -1,15 +1,8 @@
 /* eslint-disable no-useless-escape */
-import {
-  BadRequestException,
-  Controller,
-  Get,
-  Query,
-  UseGuards,
-} from '@nestjs/common'
+import { BadRequestException, Controller, Get, Query } from '@nestjs/common'
 import { z } from 'zod'
 
 import { FetchRecentQuestionsUseCase } from '@/domain/forum/application/use-cases/fetch-recent-questions'
-import { JwtAuthGuard } from '@/infra/auth/jwt-auth.guard'
 import { ZodValidationPipe } from '@/infra/http/pipes/zod-validation-pipe'
 
 import { QuestionPresenter } from '../presenters/question-presenter'
@@ -37,7 +30,6 @@ const paginationQueryValidationPipe = new ZodValidationPipe(
 )
 
 @Controller('/questions')
-@UseGuards(JwtAuthGuard)
 export class FetchRecentQuestionsController {
   constructor(
     private fetchRecentQuestionsUseCase: FetchRecentQuestionsUseCase,
