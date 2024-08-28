@@ -21,7 +21,7 @@ describe('Create Answer', () => {
   it('should be able to create an answer', async () => {
     const result = await sut.execute({
       content: 'New answer',
-      instructorId: '1',
+      authorId: '1',
       questionId: '1',
       attachmentsIds: ['1', '2'],
     })
@@ -33,5 +33,23 @@ describe('Create Answer', () => {
       expect.objectContaining({ attachmentId: new UniqueEntityId('1') }),
       expect.objectContaining({ attachmentId: new UniqueEntityId('2') }),
     ])
+  })
+
+  it('should persist attachments when creating a new answer', async () => {
+    const result = await sut.execute({
+      questionId: '1',
+      authorId: '1',
+      content: 'New question',
+      attachmentsIds: ['1', '2'],
+    })
+
+    expect(result.isRight()).toBe(true)
+    expect(answerAttachmentsRepository.items).toHaveLength(2)
+    expect(answerAttachmentsRepository.items).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ attachmentId: new UniqueEntityId('1') }),
+        expect.objectContaining({ attachmentId: new UniqueEntityId('2') }),
+      ]),
+    )
   })
 })
