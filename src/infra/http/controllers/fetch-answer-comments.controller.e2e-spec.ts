@@ -10,7 +10,7 @@ import { StudentFactory } from 'test/factories/make-student'
 import { AppModule } from '@/infra/app.module'
 import { DatabaseModule } from '@/infra/database/database.module'
 
-describe('Fetch question comments (e2e)', () => {
+describe('Fetch answer comments (E2E)', () => {
   let app: INestApplication
   let studentFactory: StudentFactory
   let questionFactory: QuestionFactory
@@ -24,37 +24,36 @@ describe('Fetch question comments (e2e)', () => {
       providers: [
         StudentFactory,
         QuestionFactory,
-        AnswerCommentFactory,
         AnswerFactory,
+        AnswerCommentFactory,
       ],
     }).compile()
 
-    app = moduleRef.createNestApplication() // Create a new instance of the application
+    app = moduleRef.createNestApplication()
 
     studentFactory = moduleRef.get(StudentFactory)
     questionFactory = moduleRef.get(QuestionFactory)
     answerFactory = moduleRef.get(AnswerFactory)
     answerCommentFactory = moduleRef.get(AnswerCommentFactory)
-
-    jwt = moduleRef.get<JwtService>(JwtService)
+    jwt = moduleRef.get(JwtService)
 
     await app.init()
   })
 
-  test('[GET] /questions/:questionId/comments', async () => {
-    const user = await studentFactory.makePrismaStudent()
+  test('[GET] /answers/:answerId/comments', async () => {
+    const user = await studentFactory.makePrismaStudent({
+      name: 'John Doe',
+    })
 
     const accessToken = jwt.sign({ sub: user.id.toString() })
 
     const question = await questionFactory.makePrismaQuestion({
       authorId: user.id,
-      title: 'Question 01',
     })
 
     const answer = await answerFactory.makePrismaAnswer({
-      authorId: user.id,
       questionId: question.id,
-      content: 'Answer 01',
+      authorId: user.id,
     })
 
     await Promise.all([
@@ -72,21 +71,21 @@ describe('Fetch question comments (e2e)', () => {
 
     const answerId = answer.id.toString()
 
-    const result = await request(app.getHttpServer())
+    const response = await request(app.getHttpServer())
       .get(`/answers/${answerId}/comments`)
       .set('Authorization', `Bearer ${accessToken}`)
-      .query({ page: 1, per_page: 2 })
       .send()
 
-    expect(result.statusCode).toBe(200)
-
-    expect(result.body).toEqual({
+    expect(response.statusCode).toBe(200)
+    expect(response.body).toEqual({
       comments: expect.arrayContaining([
         expect.objectContaining({
           content: 'Comment 01',
+          authorName: 'John Doe',
         }),
         expect.objectContaining({
-          content: 'Comment 02',
+          content: 'Comment 01',
+          authorName: 'John Doe',
         }),
       ]),
     })
