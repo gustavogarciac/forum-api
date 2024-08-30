@@ -77,6 +77,8 @@ describe('Fetch recent questions (e2e)', () => {
 
     expect(queryResult.statusCode).toBe(200)
 
+    console.log(queryResult.body.questions)
+
     expect(queryResult.body.questions).toHaveLength(1)
 
     expect(queryResult.body.questions[0]).toEqual(
