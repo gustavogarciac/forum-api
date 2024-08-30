@@ -32,6 +32,7 @@ describe('Fetch Question Answers Use Case', () => {
 
     const result = await sut.execute({
       page: 1,
+      perPage: 20,
       questionId: 'question-01',
     })
 
@@ -47,6 +48,7 @@ describe('Fetch Question Answers Use Case', () => {
 
     const result = await sut.execute({
       page: 2,
+      perPage: 20,
       questionId: 'question-01',
     })
 
