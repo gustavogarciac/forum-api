@@ -21,7 +21,7 @@ export async function waitFor(
         assertions()
         clearInterval(interval)
         resolve()
-      } catch (err) {
+      } catch {
         if (elapsedTime >= maxDuration) {
           reject(new Error('Max duration reached'))
         }
