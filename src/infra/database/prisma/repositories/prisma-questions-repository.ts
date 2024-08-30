@@ -143,7 +143,7 @@ export class PrismaQuestionsRepository implements QuestionsRepository {
       this.questionAttachmentsRepository.deleteMany(
         question.attachments.getRemovedItems(),
       ),
-      this.cacheRepository.delete(`question:${question.slug}:details`), // Deleting caching when saving a question so it can be updated
+      this.cacheRepository.delete(`question:${question.slug.value}:details`), // Deleting caching when saving a question so it can be updated
     ])
 
     DomainEvents.dispatchEventsForAggregate(question.id)
